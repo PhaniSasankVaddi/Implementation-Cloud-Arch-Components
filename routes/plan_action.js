@@ -64,12 +64,29 @@ router.post('/upgrade',tokenVerification, function(req,res,next){
     planModel.findOne({'username':token_decoded.email,'vm_name':req.vm_name, 'active_ind': true},(error,vm)=>{
         if(vm){
             planModel.updateOne({'username':token_decoded.email,'vm_name':req.vm_name, 'active_ind':true},
-            {$set:{'plan':req.plan}},
+            {$set:{'active_ind':false}},
             {upsert:true},(error1)=>{
                 if(error1){
-                    return res.status(401).json({message:'Error while upgrading the VM'});
+                    return res.status(401).json({message:'Error before upgrading the VM'});
                 }else{
-                    return res.status(200).json({message:'VM plan upgraded successfully'});
+                    var plan = new planModel({
+                        username: token_decoded.email,
+                        vm_name: req.vm_name,
+                        plan: req.upgrade_plan,
+                        active_ind:true,
+                        start_ind:true,
+                        t_start: Date.now()
+                    });
+                    
+                    let promise = plan.save();
+                    promise.then(function(doc){
+                        return res.status(200).json({message:'VM plan upgraded successfully'});
+                    })
+                    
+                    promise.catch(function(error){
+                        return res.status(400).json({message:'Error after upgrading the VM'})
+                    })
+                    
                 }
             })
         }else{
