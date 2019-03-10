@@ -20,13 +20,13 @@ app.use(cors('/*', function(req, res, next) {
 }));
 
 //add routing
-var planRoute = require('./routes/plan_action');
-var userRoute = require('./routes/user_action');
-app.use('/plans',planRoute);
-app.use('/user',userRoute);
+// var planRoute = require('./routes/plan_action');
+// var userRoute = require('./routes/user_action');
+// app.use('/plans',planRoute);
+// app.use('/user',userRoute);
 
-
-
+require('./routes/plan_action.js')(app);
+//require('./routes/user_action.js')(app);
 //add port on which app is running
 var port = process.env.PORT || 8080
 app.listen(port);
