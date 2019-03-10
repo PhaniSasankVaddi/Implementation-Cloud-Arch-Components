@@ -67,7 +67,7 @@ router.post('/upgrade',tokenVerification, function(req,res,next){
             {$set:{'active_ind':false}},
             {upsert:true},(error1)=>{
                 if(error1){
-                    return res.status(401).json({message:'Error before upgrading the VM'});
+                    return res.status(401).json({message:'Error while upgrading the VM'});
                 }else{
                     var plan = new planModel({
                         username: token_decoded.email,
