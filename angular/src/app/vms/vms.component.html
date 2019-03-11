@@ -18,19 +18,19 @@
                             <div>
                                 <label for="vmnamefield">VM Name<sup>*</sup></label>
                                 <input type="text" class="form-control" id="vmname_create" name="vmnameField_create" 
-                                placeholder="Enter VM Name" [(ngModel)] = "vmName1_create" required/>
+                                placeholder="Enter VM Name" [(ngModel)] = "model.vm_name" required/>
                             </div>
                             <div class = "radiobuttons">
                                 <input class="form-check-input" type="radio" name="radio_name" id="basicradio_id" 
-                                    value="basic" [(ngModel)] = "planPref" checked = "checked">
+                                    value="basic" [(ngModel)] = "model.plan" checked = "checked">
                                 <label class="form-check-label" for="exampleRadios1">Basic</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         
                                 <input class="form-check-input" type="radio" name="radio_name" id="largeradio_id" 
-                                    value="large" [(ngModel)] = "planPref">
+                                    value="large" [(ngModel)] = "model.plan">
                                 <label class="form-check-label" for="exampleRadios2">Large</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         
                                 <input class="form-check-input" type="radio" name="radio_name" id="ultraradio_id" 
-                                    value="ultra" [(ngModel)] = "planPref">
+                                    value="ultra" [(ngModel)] = "model.plan">
                                 <label class="form-check-label" for="exampleRadios3">Ultra</label>
                             </div>
                             <div class = "actionbutton">

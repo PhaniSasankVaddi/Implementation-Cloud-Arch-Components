@@ -29,11 +29,10 @@ export class AppComponent implements OnInit {
       this.Admin = false;
     }
   }
-  
-  movetoLogin(){
+
+  logout(){
     if(localStorage.getItem('jwt')){
       localStorage.clear();
-      this.ngOnInit();
     }
     this.router.navigate(['/auth/login']);
   }

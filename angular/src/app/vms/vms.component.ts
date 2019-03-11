@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
 
 @Component({
@@ -11,13 +12,27 @@ export class VmsComponent implements OnInit {
   vmachines:any = [];
   grandtotal = 0;
   
- vmName1_create;planPref_basic;planPref_large;planPref_ultra;
+  model:any = {};
 
-  constructor(private appservice: AppService) { }
+  constructor(private router : Router,private appservice: AppService) { }
 
   ngOnInit() {
-    //Need to fetch the VMs on load
+    if(!localStorage.getItem('jwt')){
+      this.router.navigate(['/auth/login']);
+    }else{
+      
+    }
     
+  }
+
+  createVM(){
+    let vmjson = {
+      'vm_name':this.model.vm_name,
+      'plan':this.model.plan,
+    }
+    this.appservice.postRequest('/create',vmjson).subscribe((data:any)=>{
+      
+    })
   }
 
 }
