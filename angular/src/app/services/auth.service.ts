@@ -13,9 +13,9 @@ const httpOptions = {
 })
 export class AuthService {
   
-  baseUrl = "https://cc-lab2-pvaddi.c9users.io:8081";
+  baseUrl = "https://cc-lab2-pvaddi.c9users.io:8080";
   successInd: boolean;
-  info;
+  info:any;
 
   constructor(private http : HttpClient) { }
   

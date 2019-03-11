@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from  '../../services/auth.service';
 
 @Component({
@@ -10,7 +11,7 @@ export class SignupComponent implements OnInit {
   
   model: any = {};
   signup:boolean;
-  signupMsg;
+  signupMsg:any;
 
   constructor(private authservice : AuthService,
               private router : Router) { }
@@ -32,7 +33,7 @@ export class SignupComponent implements OnInit {
       'password':this.model.password,
       'username':this.model.username
     }
-    this.authservice.userRegistration("/user/signup",userInfo);
+    this.authservice.userRegistration("/signup",userInfo);
     this.signup = true;
     this.signupMsg = this.authservice.info;
     this.router.navigate(['/auth/login']);

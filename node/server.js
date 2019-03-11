@@ -1,6 +1,7 @@
 //adding express package for http connections
 var express = require('express');
 var app = express();
+var cors = require('cors');
 
 //adding mongoose db connection
 var mongoose = require('mongoose');
@@ -12,16 +13,16 @@ app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
 
 //adding cross origin
-var cors = require('cors');
-app.use(cors('/*', function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  next();
-}));
+app.use(cors());
+app.use(cors({
+    options: '*',
+    'Access-Control-Allow-Origin': '*'
+    }));
+app.options('*', cors());   
 
-// require('./routes/plan_action.js')(app);
 require('./routes/user_action.js')(app);
+
 //add port on which app is running
-var port = process.env.PORT || 8080
+var port = process.env.PORT || 3400
 app.listen(port);
 console.log('Application running on port ' +port);

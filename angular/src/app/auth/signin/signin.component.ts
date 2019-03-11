@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from  '../../services/auth.service';
 
 @Component({
@@ -9,7 +10,7 @@ import { AuthService } from  '../../services/auth.service';
 export class SigninComponent implements OnInit {
   
   login:boolean;
-  loginMsg;
+  loginMsg:any;
   model: any = {};
 
   constructor(private authservice : AuthService,
@@ -23,7 +24,7 @@ export class SigninComponent implements OnInit {
       'email':this.model.email,
       'password':this.model.password
     }
-    this.authservice.login("/user/signin",userjson,this.model.radio);
+    this.authservice.login("/signin",userjson,this.model.radio);
     this.login = true;
     this.loginMsg = this.authservice.info;
     this.router.navigate(['/plans']);
