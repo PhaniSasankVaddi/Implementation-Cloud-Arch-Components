@@ -66,15 +66,33 @@ app.post('/start',tokenVerification, function(req,res,next){
             if(user.start_ind == true){
                 return res.status(200).json({message:'Server is already started'});
             }else{
-                planModel.updateOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},
-                {$set:{'start_ind':true,'t_start':new Date()}},
-                {upsert:true},(error1) =>{
+                var vm_info = new planModel({
+                    username:token_decoded.email,
+                    vm_name:user.vm_name,
+                    plan: user.plan,
+                    active_ind:true,
+                    start_ind:true,
+                    t_start: Date.now()
+                })
+
+                let promise = vm_info.save();
+
+                promise.then(function(doc){
+                    planModel.updateOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},
+                    {$set:{'active_ind':false}},
+                    {upsert:true},(error1) =>{
                     if(error1){
                         return res.status(401).json({message:'Error while starting the server'});
                     }else{
                         return res.status(200).json({message:'Server started successfully'});
                     }
                 });
+                });
+
+                promise.catch(function(error2){
+                    return res.status(401).json({message:'Error while creating the new instance for start server'});
+                })
+                
             }
             
         }else{
@@ -90,7 +108,8 @@ app.post('/stop',tokenVerification, function(req,res,next){
                 return res.status(200).json({message:'Server is already stopped'});
             }else{
                 planModel.updateOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},
-                {$set:{'start_ind':false, 't_end':new Date()}},
+                {$set:{'start_ind':false, 't_end':Date.now(),'duration':Date.now()-plan.t_start,
+                        'cost':plan.price*(Date.now()-plan.t_start)}},
                 {upsert:true},(error1) =>{
                     if(error1){
                         return res.status(401).json({message:'Error while stopping the server'});
@@ -150,13 +169,17 @@ app.post('/create',tokenVerification, function(req,res,next){
                 vm_name :req.vm_name,
                 plan :req.plan,
                 active_ind :true,
-                start_ind :false,
+                start_ind :true,
+                t_start:Date.now(),
+                duration :0,
+                price: plan=="basic"?5:plan=="large"?10:plan=="ultra"?15:5,
+                cost: 0
             });
             
             let promise = plan.save();
             
             promise.then(function(vm){
-                return res.status(200).json({message:'Virtual Machine created successfully. Please start it.'});
+                return res.status(200).send(plan);
             });
             
             promise.catch(function(error){
@@ -167,11 +190,9 @@ app.post('/create',tokenVerification, function(req,res,next){
 });
 
 app.post('/delete',tokenVerification, function(req,res,next){
-    planModel.findOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},(error,vm)=>{
+    planModel.findAll({'username':token_decoded.email,'vm_name':req.vm_name},(error,vm)=>{
         if(vm){
-            planModel.updateOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},
-            {$set:{'start_ind':false,'active_ind':false}},
-            {upsert:true},(error1)=>{
+            planModel.deleteMany({'username':token_decoded.email,'vm_name':req.vm_name},(error1)=>{
                 if(error1){
                     return res.status(400).json({message:'Error while deleting the VM'});
                 }else{

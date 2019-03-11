@@ -30,8 +30,12 @@ export class VmsComponent implements OnInit {
       'vm_name':this.model.vm_name,
       'plan':this.model.plan,
     }
+    console.log(this.model.vm_name);
+    console.log(this.model.plan);
     this.appservice.postRequest('/create',vmjson).subscribe((data:any)=>{
-      
+      if(data){
+        this.vmachines.push(data);
+      }
     })
   }
 

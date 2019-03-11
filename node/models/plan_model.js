@@ -9,6 +9,7 @@ var planSchema = new Schema({
     start_ind: {type:Boolean},
     t_start: {type:Date},
     t_end: {type:Date},
+    price: {type:Number},
     duration: {type:Number},
     cost: {type:Number}
 });
