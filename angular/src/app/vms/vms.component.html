@@ -18,19 +18,19 @@
                             <div>
                                 <label for="vmnamefield">VM Name<sup>*</sup></label>
                                 <input type="text" class="form-control" id="vmname_create" name="vmnameField_create" 
-                                placeholder="Enter VM Name" [(ngModel)] = "model.vm_name" required/>
+                                placeholder="Enter VM Name" [(ngModel)] = "vm_name" required/>
                             </div>
                             <div class = "radiobuttons">
                                 <input class="form-check-input" type="radio" name="radio_name" id="basicradio_id" 
-                                    value="basic" [(ngModel)] = "model.plan" checked = "checked">
+                                    value="basic" [(ngModel)] = "plan" checked = "checked">
                                 <label class="form-check-label" for="exampleRadios1">Basic</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         
                                 <input class="form-check-input" type="radio" name="radio_name" id="largeradio_id" 
-                                    value="large" [(ngModel)] = "model.plan">
+                                    value="large" [(ngModel)] = "plan">
                                 <label class="form-check-label" for="exampleRadios2">Large</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         
                                 <input class="form-check-input" type="radio" name="radio_name" id="ultraradio_id" 
-                                    value="ultra" [(ngModel)] = "model.plan">
+                                    value="ultra" [(ngModel)] = "plan">
                                 <label class="form-check-label" for="exampleRadios3">Ultra</label>
                             </div>
                             <div class = "actionbutton">
@@ -74,7 +74,7 @@
                         <td>{{machine.plan}}</td>
                         <td>{{machine.duration}}</td>
                         <td>{{machine.price}}</td>
-                        <td>{{product.total}}</td>
+                        <td>{{machine.cost}}</td>
                         <td><button type="button" class="close" aria-label="Close" (click) = "deleteItem(machine.name)"><span aria-hidden="true">&times;</span></button></td>          
                     </tr>
                 </tbody>

@@ -12,7 +12,8 @@ export class VmsComponent implements OnInit {
   vmachines:any = [];
   grandtotal = 0;
   
-  model:any = {};
+    vm_name: String;
+    plan: String;
 
   constructor(private router : Router,private appservice: AppService) { }
 
@@ -20,23 +21,33 @@ export class VmsComponent implements OnInit {
     if(!localStorage.getItem('jwt')){
       this.router.navigate(['/auth/login']);
     }else{
-      
+      this.appservice.getRequest('/findvms').subscribe((data:any)=>{
+        if(data){
+          this.vmachines.push(data);
+        }
+      })
     }
     
   }
 
   createVM(){
     let vmjson = {
-      'vm_name':this.model.vm_name,
-      'plan':this.model.plan,
+      'vm_name':this.vm_name,
+      'plan':this.plan
     }
-    console.log(this.model.vm_name);
-    console.log(this.model.plan);
-    this.appservice.postRequest('/create',vmjson).subscribe((data:any)=>{
-      if(data){
+    console.log(this.vm_name);
+    console.log(this.plan);
+    // this.appservice.postRequest('/create',vmjson).subscribe((data:any)=>{
+    //   if(data){
+    //     this.vmachines.push(data);
+    //   }
+    // })
+    this.appservice.postVM(vmjson)
+    .subscribe((data: any) => {
+      if(data != 0 || null) {
         this.vmachines.push(data);
       }
-    })
+    });
   }
 
 }

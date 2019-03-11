@@ -49,7 +49,7 @@ app.post('/signin', function(req,res,next){
 });
 
 app.get('/findvms',tokenVerification,function(req,res,next){
-    planModel.findAll({'username':token_decoded.email,'active_ind':true},(error,vms)=>{
+    planModel.find({'username':token_decoded.email,'active_ind':true},(error,vms)=>{
         if(error){
             return res.status(400).json({message:'Error while fetching the Virtual Machines'});
         }else if(!vms){
@@ -160,10 +160,12 @@ app.post('/changeplan',tokenVerification, function(req,res,next){
 });
 
 app.post('/create',tokenVerification, function(req,res,next){
-    planModel.findOne({'username':token_decoded.email,'vm_name':req.vm_name},(error,vm)=>{
+    console.log(req);
+    planModel.find({$and:[{'username':token_decoded.email}, {'vm_name':req.vm_name}]},(error,vm)=>{
         if(vm){
             return res.status(400).json({message:'Virtual Machine exists with this name. Please choose a different name'})
         }else{
+            console.log('this is the req ', req);
             var plan = new planModel({
                 username :token_decoded.email,
                 vm_name :req.vm_name,
@@ -172,7 +174,7 @@ app.post('/create',tokenVerification, function(req,res,next){
                 start_ind :true,
                 t_start:Date.now(),
                 duration :0,
-                price: plan=="basic"?5:plan=="large"?10:plan=="ultra"?15:5,
+                price: req.plan=="basic"?5:req.plan=="large"?10:req.plan=="ultra"?15:5,
                 cost: 0
             });
             
