@@ -23,13 +23,41 @@ export class VmsComponent implements OnInit {
     }else{
       this.appservice.getRequest('/findvms').subscribe((data:any)=>{
         if(data){
-          this.vmachines.push(data);
+          this.vmachines = [];
+          data.forEach(element => {
+            this.vmachines.push(element);
+          });
         }
-      })
+      });
     }
     
   }
 
+  startVM(virtual_machine){
+    let vmjson = {
+      'vm_name':virtual_machine,
+    }
+    this.appservice.postRequest('/start',vmjson).subscribe((data:any)=>{
+
+      if(data){
+          this.vmachines.push(data);
+        
+      }
+    })
+  }
+
+  stopVM(virtual_machine){
+    let vmjson = {
+      'vm_name':virtual_machine,
+    }
+    this.appservice.postRequest('/stop',vmjson).subscribe((data:any)=>{
+      if(data){
+        
+          this.vmachines.push(data);
+       
+      }
+    })
+  }
   createVM(){
     let vmjson = {
       'vm_name':this.vm_name,
@@ -37,17 +65,68 @@ export class VmsComponent implements OnInit {
     }
     console.log(this.vm_name);
     console.log(this.plan);
-    // this.appservice.postRequest('/create',vmjson).subscribe((data:any)=>{
-    //   if(data){
-    //     this.vmachines.push(data);
-    //   }
-    // })
-    this.appservice.postVM(vmjson)
-    .subscribe((data: any) => {
-      if(data != 0 || null) {
+    this.appservice.postRequest('/create',vmjson).subscribe((data:any)=>{
+      if(data){
         this.vmachines.push(data);
       }
-    });
+    })
+    
+  }
+  deleteVM(vmachine){
+    let vmjson = {
+      'vm_name':vmachine
+    }
+    this.appservice.postRequest('/delete',vmjson).subscribe((data:any)=>{
+      if(data){
+        this.ngOnInit();
+      }
+    })
+  }
+
+  upgradeVM(vmachine,plan){
+
+    switch(plan){
+      case "basic":
+      this.changePlan(vmachine,plan,"large");
+      break;
+
+      case "large":
+      this.changePlan(vmachine,plan,"ultra");
+      break;
+
+      case "ultra":
+      default:
+
+    }
+  }
+    
+  downgradeVM(vmachine,plan){
+
+    switch(plan){
+      case "ultra":
+      this.changePlan(vmachine,plan,"large");
+      break;
+
+      case "large":
+      this.changePlan(vmachine,plan,"basic");
+      break;
+
+      case "basic":
+      default:
+    }
+  }
+
+  changePlan(vmachine,oldPlan,newPlan){
+    let vmjson = {
+      'vm_name':vmachine,
+      'oldplan':oldPlan,
+      'newplan':newPlan
+    }
+    this.appservice.postRequest('/changeplan',vmjson).subscribe((data:any)=>{
+      if(data){
+        this.ngOnInit();
+      }
+    })
   }
 
 }

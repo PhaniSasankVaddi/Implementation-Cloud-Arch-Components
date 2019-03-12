@@ -25,9 +25,4 @@ export class AppService {
   getRequest(route){
       return this.http.get(this.baseUrl+route,httpOptions);  
   }
-
-  postVM(itemjson1) {
-    console.log('in service', itemjson1)
-    return this.http.post(this.baseUrl + '/create', itemjson1, httpOptions);
-  }
 }
