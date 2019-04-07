@@ -42,7 +42,7 @@ app.post('/signin', function(req,res,next){
             }
         }
         else{
-            return res.status(510).json({message:'Admin NotFound'});
+            return res.status(510).json({message:'User NotFound'});
         }
     })
     
@@ -61,7 +61,7 @@ app.get('/findvms',tokenVerification,function(req,res,next){
 });
     
 app.post('/start',tokenVerification, function(req,res,next){
-    planModel.findOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},(error,user)=>{
+    planModel.findOne({'username':token_decoded.email,'vm_name':req.body.vm_name,'active_ind':true},(error,user)=>{
         if(user){
             if(user.start_ind == true){
                 return res.status(200).json({message:'Server is already started'});
@@ -72,19 +72,20 @@ app.post('/start',tokenVerification, function(req,res,next){
                     plan: user.plan,
                     active_ind:true,
                     start_ind:true,
-                    t_start: Date.now()
-                })
+                    t_start: Date.now(),
+                    price: user.plan=="basic"?5:user.plan=="large"?10:user.plan=="ultra"?15:5
+                });
 
                 let promise = vm_info.save();
 
                 promise.then(function(doc){
-                    planModel.updateOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},
+                    planModel.updateOne({'username':token_decoded.email,'vm_name':req.body.vm_name,'active_ind':true},
                     {$set:{'active_ind':false}},
                     {upsert:true},(error1) =>{
                     if(error1){
                         return res.status(401).json({message:'Error while starting the server'});
                     }else{
-                        return res.status(200).json({message:'Server started successfully'});
+                        return res.status(200).send(vm_info);
                     }
                 });
                 });
@@ -102,14 +103,14 @@ app.post('/start',tokenVerification, function(req,res,next){
 });
 
 app.post('/stop',tokenVerification, function(req,res,next){
-    planModel.findOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},(error,plan)=>{
+    planModel.findOne({'username':token_decoded.email,'vm_name':req.body.vm_name,'active_ind':true},(error,plan)=>{
         if(plan){
             if(plan.start_ind == false){
                 return res.status(200).json({message:'Server is already stopped'});
             }else{
-                planModel.updateOne({'username':token_decoded.email,'vm_name':req.vm_name,'active_ind':true},
-                {$set:{'start_ind':false, 't_end':Date.now(),'duration':Date.now()-plan.t_start,
-                        'cost':plan.price*(Date.now()-plan.t_start)}},
+                planModel.updateOne({'username':token_decoded.email,'vm_name':req.body.vm_name,'active_ind':true},
+                {$set:{'start_ind':false, 't_end':Date.now(),'duration':(Date.now()-plan.t_start)/60000,
+                        'cost':(plan.price*((Date.now()-plan.t_start)/60000))/100}},
                 {upsert:true},(error1) =>{
                     if(error1){
                         return res.status(401).json({message:'Error while stopping the server'});
@@ -125,34 +126,35 @@ app.post('/stop',tokenVerification, function(req,res,next){
 });
 
 app.post('/changeplan',tokenVerification, function(req,res,next){
-    planModel.findOne({'username':token_decoded.email,'vm_name':req.vm_name, 'active_ind': true},(error,vm)=>{
+    planModel.findOne({'username':token_decoded.email,'vm_name':req.body.vm_name, 'active_ind': true},(error,vm)=>{
         if(vm){
-            planModel.updateOne({'username':token_decoded.email,'vm_name':req.vm_name, 'active_ind':true},
-            {$set:{'active_ind':false}},
+            planModel.updateOne({'vm_name':req.body.vm_name,'username':token_decoded.email,'plan':req.body.oldplan,'active_ind':true},
+            {$set:{'active_ind':false,'t_end':Date.now(),'duration':(Date.now()-vm.t_start)/60000, 'cost':(vm.price*((Date.now()-vm.t_start)/60000))/100}},
             {upsert:true},(error1)=>{
-                if(error1){
-                    return res.status(401).json({message:'Error while upgrading the VM'});
-                }else{
-                    var plan = new planModel({
-                        username: token_decoded.email,
-                        vm_name: req.vm_name,
-                        plan: req.upgrade_plan,
-                        active_ind:true,
-                        start_ind:true,
-                        t_start: Date.now()
-                    });
+            if(error1){
+                return res.status(401).json({message:'Error while upgrading the VM'});
+            }else{
+                var newPlanVM = new planModel({
+                    username: token_decoded.email,
+                    vm_name: req.body.vm_name,
+                    plan: req.body.newplan,
+                    active_ind:true,
+                    start_ind:true,
+                    t_start: Date.now(),
+                    price: req.body.newplan=="basic"?5:req.body.newplan=="large"?10:req.body.newplan=="ultra"?15:5
+                });
                     
-                    let promise = plan.save();
-                    promise.then(function(doc){
-                        return res.status(200).json({message:'VM plan upgraded successfully'});
-                    });
+                let promise = newPlanVM.save();
+                promise.then(function(doc){
+                    return res.status(200).send(newPlanVM);
+                });
                     
-                    promise.catch(function(error){
-                        return res.status(400).json({message:'Error after upgrading the VM'})
-                    });
+                promise.catch(function(error){
+                    return res.status(400).json({message:'Error after upgrading the VM'})
+                });
                     
-                }
-            });
+            }
+        });
         }else{
             return res.status(400).json({message:'Error while upgrading the VM'});
         }
@@ -161,21 +163,19 @@ app.post('/changeplan',tokenVerification, function(req,res,next){
 
 app.post('/create',tokenVerification, function(req,res,next){
     console.log(req);
-    planModel.find({$and:[{'username':token_decoded.email}, {'vm_name':req.vm_name}]},(error,vm)=>{
-        if(vm){
+    planModel.find({$and:[{'username':token_decoded.email}, {'vm_name':req.body.vm_name}]},(error,vm)=>{
+        if(vm.length !=0){
             return res.status(400).json({message:'Virtual Machine exists with this name. Please choose a different name'})
         }else{
             console.log('this is the req ', req);
             var plan = new planModel({
                 username :token_decoded.email,
-                vm_name :req.vm_name,
-                plan :req.plan,
+                vm_name :req.body.vm_name,
+                plan :req.body.plan,
                 active_ind :true,
                 start_ind :true,
                 t_start:Date.now(),
-                duration :0,
-                price: req.plan=="basic"?5:req.plan=="large"?10:req.plan=="ultra"?15:5,
-                cost: 0
+                price: req.body.plan=="basic"?5:req.body.plan=="large"?10:req.body.plan=="ultra"?15:5
             });
             
             let promise = plan.save();
@@ -192,9 +192,9 @@ app.post('/create',tokenVerification, function(req,res,next){
 });
 
 app.post('/delete',tokenVerification, function(req,res,next){
-    planModel.findAll({'username':token_decoded.email,'vm_name':req.vm_name},(error,vm)=>{
+    planModel.find({'username':token_decoded.email,'vm_name':req.body.vm_name},(error,vm)=>{
         if(vm){
-            planModel.deleteMany({'username':token_decoded.email,'vm_name':req.vm_name},(error1)=>{
+            planModel.deleteMany({'username':token_decoded.email,'vm_name':req.body.vm_name},(error1)=>{
                 if(error1){
                     return res.status(400).json({message:'Error while deleting the VM'});
                 }else{
@@ -205,6 +205,19 @@ app.post('/delete',tokenVerification, function(req,res,next){
           return res.status(400).json({message:'Error while deleting the VM'}) 
         }
     })
+});
+
+app.post('/getfare',tokenVerification, function(req,res,next){
+    planModel.find({'username':token_decoded.email,'vm_name':req.body.vm_name},(error,vm)=>{
+        if(error){
+            return res.status(400).json({message:'Error while calculating the fare'})
+        }else if(!vm){
+            return res.status(201).json({messgae:'No VMs present'});
+        }else{
+            return res.status(200).send(vm);
+        }
+    });
+    
 });
 
 var token_decoded = '';

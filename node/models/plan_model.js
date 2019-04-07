@@ -2,16 +2,16 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var planSchema = new Schema({
-    username: {type:String},
-    vm_name: {type:String},
-    plan: {type:String},
-    active_ind: {type:Boolean},
-    start_ind: {type:Boolean},
-    t_start: {type:Date},
-    t_end: {type:Date},
-    price: {type:Number},
-    duration: {type:Number},
-    cost: {type:Number}
+    username: String,
+    vm_name: String,
+    plan: String,
+    active_ind: Boolean,
+    start_ind: Boolean,
+    t_start:Date,
+    t_end:Date,
+    price:Number,
+    duration:Number,
+    cost:Number
 });
 
-module.exports = mongoose.model('PlanUsage',planSchema);
+module.exports = mongoose.model('planModel',planSchema);

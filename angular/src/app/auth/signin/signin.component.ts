@@ -27,7 +27,9 @@ export class SigninComponent implements OnInit {
     this.authservice.login("/signin",userjson,this.model.radio);
     this.login = true;
     this.loginMsg = this.authservice.info;
-    this.router.navigate(['/plans']);
+    if(localStorage.getItem('jwt')){
+      this.router.navigate(['/plans']);
+    }
   }
 
 }

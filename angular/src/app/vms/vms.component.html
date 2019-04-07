@@ -62,26 +62,57 @@
                         <th scope="col">S.No</th>
                         <th scope="col">VM Name</th>
                         <th scope="col">Plan</th>
-                        <th scope="col">Duration</th>
                         <th scope="col">Price of plan</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Duration</th>
                         <th scope="col">Price</th>
+                        <th scope="col" style = "padding-left:65px">Actions</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor = "let machine of vmachines; let i=index">
                         <td scope="row">{{i+1}}</td>
-                        <td>{{machine.name}}</td>
+                        <td>{{machine.vm_name}}</td>
                         <td>{{machine.plan}}</td>
-                        <td>{{machine.duration}}</td>
                         <td>{{machine.price}}</td>
+                        <td><span *ngIf = "machine.start_ind">Started</span><span *ngIf = "!machine.start_ind">Stopped</span></td>
+                        <td>{{machine.duration}}</td>
                         <td>{{machine.cost}}</td>
-                        <td><button type="button" class="close" aria-label="Close" (click) = "deleteItem(machine.name)"><span aria-hidden="true">&times;</span></button></td>          
+                        <td>
+                            <span><button class="btn btn-secondary" (click) = "startVM(machine.vm_name)">▷</button></span>
+                            <span><button class="btn btn-secondary" (click) = "stopVM(machine.vm_name)">□</button></span>
+                            <span><button class="btn btn-secondary" (click) = "upgradeVM(machine.vm_name,machine.plan)">↑</button></span>
+                            <span><button class="btn btn-secondary" (click) = "downgradeVM(machine.vm_name,machine.plan)">↓</button></span>
+                            <span><button class="btn btn-secondary" (click) = "deleteVM(machine.vm_name)">x</button></span>
+                        </td>
+                        <td><span *ngIf = "!machine.start_ind"><button type="button" class="btn btn-block btn-primary waves-effect" data-toggle="modal" data-target="#myModal" (click) = "calFare(machine.vm_name)">Fare</button></span></td>
                     </tr>
                 </tbody>
             </table>
             </div>
         </div>
     </div>
+    
+    <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">Message</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Total Usage of this VM is {{usagePeriod}} min and price is ${{price}}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div> 
+      </div>
+    </div>
+  </div>
+    
 </div>
 
 

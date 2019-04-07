@@ -13,7 +13,7 @@ const httpOptions = {
 })
 export class AuthService {
   
-  baseUrl = "http://localhost:3400";
+  baseUrl = "https://cc-lab2-pvaddi.c9users.io:8080";
   successInd: boolean;
   info:any;
 
